@@ -59,7 +59,7 @@ export const getPostById = async (req, res) => {
     await client.end();
 
     if (results.rows.length === 0) {
-      return res.status(404).json({message: 'Product not found'});
+      return res.status(404).json({message: 'Post not found'});
     }
 
     res.status(200).json(results.rows[0]);
@@ -109,14 +109,14 @@ export const deletePost = async (req, res) => {
       connectionString: process.env.PG_URI
     });
     await client.connect();
-    await client.query('DELETE FROM posts WHERE id = $1 RETURNING *;', [id]);
+    const results = await client.query('DELETE FROM posts WHERE id = $1 RETURNING *;', [id]);
 
     if (results.rowCount === 0) {
       await client.end();
       return res.status(404).json({ message: 'Post not found'});
     }
     await client.end();
-    res.status(204).send();
+    res.status(200).json({ message: 'Post deleted successfully' });
   } catch (error) {
     console.error('Error deleting post: ', error);
     res.status(500).json({ message: 'Internal Server Error'});
