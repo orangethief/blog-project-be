@@ -101,3 +101,24 @@ export const updatePost = async (req, res) => {
     return res.status(500).json({ message: 'Internal Server Error'});
   }
 };
+
+export const deletePost = async (req, res) => {
+  const {id} = req.params;
+  try{
+    const client = new Client({
+      connectionString: process.env.PG_URI
+    });
+    await client.connect();
+    await client.query('DELETE FROM posts WHERE id = $1 RETURNING *;', [id]);
+
+    if (results.rowCount === 0) {
+      await client.end();
+      return res.status(404).json({ message: 'Post not found'});
+    }
+    await client.end();
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting post: ', error);
+    res.status(500).json({ message: 'Internal Server Error'});
+  }
+  };
