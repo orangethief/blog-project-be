@@ -68,3 +68,36 @@ export const getPostById = async (req, res) => {
     res.status(500).json({message: 'Internal Server Error'});
   }
 };
+
+export const updatePost = async (req, res) => {
+  const { id } = req.params;
+  const { author, title, content, cover } = req.body;
+
+  if (!author || !title || !content || !cover) {
+    return res.status(400).json({ message: "All fields a required"});
+  }
+
+  try {
+    const client = new Client({
+      connectionString: process.env.PG_URI,
+    });
+
+  await client.connect();
+
+  const results = await client.query(
+    'UPDATE posts SET author = $1, title = $2, content = $3, cover = $4 WHERE id = $5 RETURNING *;',
+    [author, title, content, cover, id]
+  );
+
+  await client.end();
+
+  if(results.rowCount === 0) {
+    return res.status(404).json ({ message: 'Post not found'});
+  }
+
+  res.status(200).json(results.rows[0]);
+  } catch (error) {
+    console.error('Error updating post: ', error);
+    return res.status(500).json({ message: 'Internal Server Error'});
+  }
+};

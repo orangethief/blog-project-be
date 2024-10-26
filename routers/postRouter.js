@@ -5,7 +5,7 @@ const postRouter = Router();
 
 postRouter.get('/', getPosts);
 postRouter.post('/', createPost);
-postRouter.post('/:id', getPostById);
+postRouter.get('/:id', getPostById);
 /* postRouter.put('/:id', updatePost);
 postRouter.delete('/:id', deletePost); */
 
