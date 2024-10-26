@@ -45,4 +45,26 @@ export const createPost = async (req, res) => {
     console.error('Error creating product: ', error);
     return res.status(500).json({ message: 'Internal Server Error'});
   }
-}
+};
+
+export const getPostById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const client = new Client({
+      connectionString: process.env.PG_URI
+    });
+
+    await client.connect();
+    const results = await client.query('SELECT * FROM posts WHERE id = $1;', [id]);
+    await client.end();
+
+    if (results.rows.length === 0) {
+      return res.status(404).json({message: 'Product not found'});
+    }
+
+    res.status(200).json(results.rows[0]);
+  } catch (error) {
+    console.log('Error fetching post: ', error);
+    res.status(500).json({message: 'Internal Server Error'});
+  }
+};
